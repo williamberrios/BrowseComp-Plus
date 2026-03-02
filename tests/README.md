@@ -46,7 +46,19 @@ python searcher/mcp_server.py \
     --public
 ```
 
-### 2. Run the test
+### 2. Get the public URL
+
+When the server starts it prints a line like:
+```
+Public MCP endpoint available at: https://xxxx.ngrok-free.app/mcp
+```
+Copy that URL and use it in the next step.
+
+> **Note:** The ngrok URL is **not permanent** — it changes every time the server restarts (free tier).
+> To get a stable URL, claim your free static domain at [dashboard.ngrok.com/domains](https://dashboard.ngrok.com/domains)
+> and configure it in `~/.config/ngrok/ngrok.yml`.
+
+### 3. Run the test
 
 ```bash
 ANTHROPIC_API_KEY=<your_key> python tests/test_mcp_faiss.py \
@@ -81,7 +93,19 @@ python searcher/mcp_server.py \
     --public
 ```
 
-### 2. Run the test
+### 2. Get the public URL
+
+When the server starts it prints a line like:
+```
+Public MCP endpoint available at: https://xxxx.ngrok-free.app/mcp
+```
+Copy that URL and use it in the next step.
+
+> **Note:** The ngrok URL is **not permanent** — it changes every time the server restarts (free tier).
+> To get a stable URL, claim your free static domain at [dashboard.ngrok.com/domains](https://dashboard.ngrok.com/domains)
+> and configure it in `~/.config/ngrok/ngrok.yml`.
+
+### 3. Run the test
 
 ```bash
 source .venv/bin/activate
