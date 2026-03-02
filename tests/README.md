@@ -9,15 +9,16 @@ Activate the virtual environment:
 source .venv/bin/activate
 ```
 
-If using BM25 (required for `test_mcp_bm25.py`), Java 21 must be installed. The recommended way without sudo is via conda:
+If using BM25 (required for `test_mcp_bm25.py`), Java 21 must be installed. The no-sudo way is to download Amazon Corretto 21 directly to your home directory:
 
 ```bash
-conda install -c conda-forge openjdk=21
+wget https://corretto.aws/downloads/latest/amazon-corretto-21-x64-linux-jdk.tar.gz
+tar -xzf amazon-corretto-21-x64-linux-jdk.tar.gz -C ~/
 ```
 
 Then set `JAVA_HOME`:
 ```bash
-export JAVA_HOME=$(ls -d ~/amazon-corretto-*)   # adjust to your Java install path
+export JAVA_HOME=$(ls -d ~/amazon-corretto-*)
 export PATH=$JAVA_HOME/bin:$PATH
 ```
 
