@@ -9,10 +9,21 @@ Activate the virtual environment:
 source .venv/bin/activate
 ```
 
-If using BM25 (required for `test_mcp_bm25.py`), set `JAVA_HOME`:
+If using BM25 (required for `test_mcp_bm25.py`), Java 21 must be installed. The recommended way without sudo is via conda:
+
+```bash
+conda install -c conda-forge openjdk=21
+```
+
+Then set `JAVA_HOME`:
 ```bash
 export JAVA_HOME=$(ls -d ~/amazon-corretto-*)   # adjust to your Java install path
 export PATH=$JAVA_HOME/bin:$PATH
+```
+
+Verify the installation:
+```bash
+java -version   # should show openjdk 21.x.x
 ```
 
 ---
