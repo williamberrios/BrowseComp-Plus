@@ -1,6 +1,6 @@
 # Test Scripts Guide
 
-This document explains how to run the two MCP test scripts: `test_mcp_faiss.py` and `test_mcp_bm25.py`.
+This document explains how to run the MCP test scripts: `test_mcp_faiss.py`, `test_mcp_bm25.py`, and `test_mcp_langchain.py`.
 
 ## Prerequisites
 
@@ -123,11 +123,63 @@ ANTHROPIC_API_KEY=<your_key> python tests/test_mcp_bm25.py \
 
 ---
 
+## test_mcp_langchain.py
+
+Simple LangChain + LangGraph ReAct agent that connects to the MCP server via `streamable-http` and uses the search tool to answer a query.
+
+### 0. Install dependencies
+
+```bash
+conda activate wbr-mas
+uv pip install langchain-mcp-adapters langchain-anthropic langgraph
+```
+
+### 1. Start the MCP server (separate terminal)
+
+```bash
+export JAVA_HOME=$(ls -d ~/amazon-corretto-*)
+export PATH=$JAVA_HOME/bin:$PATH
+source .venv/bin/activate
+python searcher/mcp_server.py \
+    --searcher-type bm25 \
+    --index-path indexes/bm25 \
+    --port 8080 \
+    --public \
+    --transport streamable-http
+```
+
+### 2. Get the public URL
+
+When the server starts it prints a line like:
+```
+Public MCP endpoint available at: https://xxxx.ngrok-free.app/mcp
+```
+Copy that URL and use it in the next step.
+
+### 3. Run the test
+
+```bash
+conda activate wbr-mas
+ANTHROPIC_API_KEY=<your_key> python tests/test_mcp_langchain.py \
+    --mcp-url "https://xxxx.ngrok-free.app/mcp" \
+    --query "What is BM25?"
+```
+
+**Arguments:**
+
+| Argument | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `--mcp-url` | Yes | — | Public ngrok URL of the running MCP server |
+| `--query` | No | `"What is BM25 retrieval?"` | Question to ask |
+| `--model` | No | `claude-sonnet-4-6` | Anthropic model to use |
+
+---
+
 ## Notes
 
 - The ngrok URL is printed by the server on startup. Copy it before running the test.
 - `ANTHROPIC_API_KEY` must be set as an environment variable.
-- `test_mcp_bm25.py` requires the BM25 index at `indexes/bm25/`. Download it first with:
+- `test_mcp_bm25.py` and `test_mcp_langchain.py` require the BM25 index at `indexes/bm25/`. Download it first with:
   ```bash
   bash scripts_build_index/download_indexes.sh
   ```

@@ -9,11 +9,7 @@ Usage:
         export JAVA_HOME=$(ls -d ~/amazon-corretto-*)
         export PATH=$JAVA_HOME/bin:$PATH
         source .venv/bin/activate
-        python searcher/mcp_server.py \\
-            --searcher-type bm25 \\
-            --index-path indexes/bm25 \\
-            --port 8080 \\
-            --public
+        python searcher/mcp_server.py --searcher-type bm25 --index-path indexes/bm25 --port 8080 --public --transport streamable-http
 
     2. Run this script:
         source .venv/bin/activate
