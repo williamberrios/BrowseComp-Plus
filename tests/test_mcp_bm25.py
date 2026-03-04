@@ -9,14 +9,32 @@ Usage:
         export JAVA_HOME=$(ls -d ~/amazon-corretto-*)
         export PATH=$JAVA_HOME/bin:$PATH
         source .venv/bin/activate
-        python searcher/mcp_server.py --searcher-type bm25 --index-path indexes/bm25 --port 8080 --public --transport streamable-http
+        python searcher/mcp_server.py \
+            --searcher-type bm25 \
+            --index-path indexes/bm25 \
+            --port 8080 \
+            --host 0.0.0.0 \
+            --public \
+            --transport streamable-http
 
-    2. Run this script:
+    2. Get the MCP URL. Pick one depending on your setup:
+        - Local access:     http://127.0.0.1:8080/mcp/
+        - Tailscale access: http://<tailscale-ip>:8080/mcp/
+                            e.g. http://100.113.79.3:8080/mcp/
+                            or   http://<machine-name>.<tailnet>.ts.net:8080/mcp/
+        - Public (ngrok):   https://xxxx.ngrok-free.app/mcp
+                            (printed by the server on startup)
+
+        Note: --host 0.0.0.0 is required to accept connections from Tailscale or other
+        external networks. Without it, the server only listens on 127.0.0.1.
+
+    3. Run this script:
         source .venv/bin/activate
-        ANTHROPIC_API_KEY=<your_key> python test_mcp_bm25.py --mcp-url "https://xxxx.ngrok-free.app/mcp"
+        ANTHROPIC_API_KEY=<your_key> python test_mcp_bm25.py \
+            --mcp-url "http://100.113.79.3:8080/mcp/"
 
 Arguments:
-    --mcp-url   (required) Public URL of the running MCP server.
+    --mcp-url   (required) URL of the running MCP server.
     --model     Anthropic model to use (default: claude-sonnet-4-20250514).
     --budget    Thinking token budget (default: 4096).
 

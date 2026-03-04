@@ -205,6 +205,29 @@ To reproduce results from BrowseComp-Plus, you can refer to the following docs f
 
 As an alternative to deploying the retrieval server yourself locally, you can also use a [pre-deployed MCP server from NetMind](docs/netmind_mcp.md).
 
+### Accessing the MCP Server from Other Machines
+
+By default, the MCP server binds to `127.0.0.1` (localhost only). To make it reachable from other nodes — for example, via [Tailscale](https://tailscale.com/) — add `--host 0.0.0.0`:
+
+```bash
+python searcher/mcp_server.py \
+    --searcher-type faiss \
+    --index-path "indexes/qwen3-embedding-8b/corpus.shard*.pkl" \
+    --model-name "Qwen/Qwen3-Embedding-8B" \
+    --normalize \
+    --port 8081 \
+    --host 0.0.0.0 \
+    --transport streamable-http
+```
+
+Then connect from another machine using the server's Tailscale IP:
+
+```
+http://<tailscale-ip>:8081/mcp/
+```
+
+Run `tailscale ip -4` on the server machine to get its Tailscale IP. See [tests/README.md](tests/README.md) for more details.
+
 To incorporate your own retriever with the search agents, you can refer to [Custom Retriever](docs/custom_retriever.md).
 
 ## Contact

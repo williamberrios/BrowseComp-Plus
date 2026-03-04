@@ -63,6 +63,12 @@ def main():
             help="Port to bind the HTTP server when --transport=http (default: 8000). Ignored for stdio.",
         )
         parser.add_argument(
+            "--host",
+            type=str,
+            default="127.0.0.1",
+            help="Host to bind the HTTP server (default: 127.0.0.1). Use 0.0.0.0 to accept connections from all interfaces.",
+        )
+        parser.add_argument(
             "--public",
             action="store_true",
             help="If set with --transport=http, automatically create an ngrok tunnel and print the public MCP URL.",
@@ -104,6 +110,7 @@ def main():
         include_get_document = args.get_document
         transport = args.transport
         port = args.port
+        host = args.host
         public = args.public
 
         mcp = FastMCP(name="search-server")
@@ -149,7 +156,7 @@ def main():
         if transport == "stdio":
             mcp.run(transport="stdio")
         else:
-            mcp.run(transport=transport, path="/mcp", port=port)
+            mcp.run(transport=transport, path="/mcp", host=host, port=port)
 
     except Exception as e:
         print("Error", e)

@@ -5,8 +5,32 @@ Install dependencies first:
     uv pip install langchain-mcp-adapters langchain-anthropic langgraph
 
 Usage:
-conda activate wbr-mas
-ANTHROPIC_API_KEY=<your_key> python tests/test_mcp_langchain.py --mcp-url "https://xxxx.ngrok-free.dev/mcp" --query "What is BM25?"
+    1. Start the MCP server (in a separate terminal):
+        source .venv/bin/activate
+        python searcher/mcp_server.py \
+            --searcher-type bm25 \
+            --index-path indexes/bm25 \
+            --port 8080 \
+            --host 0.0.0.0 \
+            --public \
+            --transport streamable-http
+
+    2. Get the MCP URL. Pick one depending on your setup:
+        - Local access:     http://127.0.0.1:8080/mcp/
+        - Tailscale access: http://<tailscale-ip>:8080/mcp/
+                            e.g. http://100.113.79.3:8080/mcp/
+                            or   http://<machine-name>.<tailnet>.ts.net:8080/mcp/
+        - Public (ngrok):   https://xxxx.ngrok-free.app/mcp
+                            (printed by the server on startup)
+
+        Note: --host 0.0.0.0 is required to accept connections from Tailscale or other
+        external networks. Without it, the server only listens on 127.0.0.1.
+
+    3. Run this script:
+        conda activate wbr-mas
+        ANTHROPIC_API_KEY=<your_key> python tests/test_mcp_langchain.py \
+            --mcp-url "http://100.113.79.3:8080/mcp/" \
+            --query "What is BM25?"
 """
 import argparse
 import asyncio

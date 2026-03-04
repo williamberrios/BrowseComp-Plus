@@ -4,22 +4,34 @@ Quick test script to verify the MCP retrieval server is working with the Anthrop
 Usage:
     1. Start the MCP server (in a separate terminal):
         source .venv/bin/activate
-        python searcher/mcp_server.py \\
-            --searcher-type faiss \\
-            --index-path "indexes/qwen3-embedding-8b/corpus.shard*.pkl" \\
-            --model-name "Qwen/Qwen3-Embedding-8B" \\
-            --normalize \\
-            --port 8080 \\
-            --public
+        python searcher/mcp_server.py \
+            --searcher-type faiss \
+            --index-path "indexes/qwen3-embedding-8b/corpus.shard*.pkl" \
+            --model-name "Qwen/Qwen3-Embedding-8B" \
+            --normalize \
+            --port 8081 \
+            --host 0.0.0.0 \
+            --public \
+            --transport streamable-http
 
-    2. Copy the public ngrok URL printed by the server, e.g.:
-            https://xxxx.ngrok-free.app/mcp
+    2. Get the MCP URL. Pick one depending on your setup:
+        - Local access:     http://127.0.0.1:8081/mcp/
+        - Tailscale access: http://<tailscale-ip>:8081/mcp/
+                            e.g. http://100.113.79.3:8081/mcp/
+                            or   http://<machine-name>.<tailnet>.ts.net:8081/mcp/
+        - Public (ngrok):   https://xxxx.ngrok-free.app/mcp
+                            (printed by the server on startup)
+
+        Note: --host 0.0.0.0 is required to accept connections from Tailscale or other
+        external networks. Without it, the server only listens on 127.0.0.1.
 
     3. Run this script:
-        ANTHROPIC_API_KEY=<your_key> python test_mcp_faiss.py --mcp-url "https://xxxx.ngrok-free.app/mcp" --query "What is the capital of France?"
+        ANTHROPIC_API_KEY=<your_key> python test_mcp_faiss.py \
+            --mcp-url "http://100.113.79.3:8081/mcp/" \
+            --query "What is the capital of France?"
 
 Arguments:
-    --mcp-url   (required) Public URL of the running MCP server.
+    --mcp-url   (required) URL of the running MCP server.
     --query     Question to ask (default: "What is the capital of France?").
     --model     Anthropic model to use (default: claude-sonnet-4-20250514).
 
