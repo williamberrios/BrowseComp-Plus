@@ -47,8 +47,8 @@ python searcher/mcp_server.py \
     --normalize \
     --port 8081 \
     --host 0.0.0.0 \
-    --public \
-    --transport streamable-http
+    --transport streamable-http \
+    --log-file searcher/logs/mcp_server_faiss.log
 ```
 
 > **Note:** `--host 0.0.0.0` is required to accept connections from Tailscale or other external networks. Without it, the server only listens on `127.0.0.1`.
@@ -57,12 +57,14 @@ python searcher/mcp_server.py \
 
 Pick the access method that fits your setup:
 
-| Method | URL |
-| --- | --- |
-| Local | `http://127.0.0.1:8081/mcp/` |
-| Tailscale (IP) | `http://<tailscale-ip>:8081/mcp/` |
-| Tailscale (hostname) | `http://<machine-name>.<tailnet>.ts.net:8081/mcp/` |
-| Public (ngrok) | printed by server on startup, e.g. `https://xxxx.ngrok-free.app/mcp` |
+
+| Method               | URL                                                                  |
+| -------------------- | -------------------------------------------------------------------- |
+| Local                | `http://127.0.0.1:8081/mcp/`                                         |
+| Tailscale (IP)       | `http://<tailscale-ip>:8081/mcp/`                                    |
+| Tailscale (hostname) | `http://<machine-name>.<tailnet>.ts.net:8081/mcp/`                   |
+| Public (ngrok)       | printed by server on startup, e.g. `https://xxxx.ngrok-free.app/mcp` |
+
 
 To find your Tailscale IP: `tailscale ip -4`
 
@@ -81,11 +83,11 @@ ANTHROPIC_API_KEY=<your_key> python tests/test_mcp_faiss.py \
 **Arguments:**
 
 
-| Argument    | Required | Default                            | Description                         |
-| ----------- | -------- | ---------------------------------- | ----------------------------------- |
-| `--mcp-url` | Yes      | —                                  | URL of the running MCP server       |
-| `--query`   | No       | `"What is the capital of France?"` | Question to ask                     |
-| `--model`   | No       | `claude-sonnet-4-20250514`         | Anthropic model to use              |
+| Argument    | Required | Default                            | Description                   |
+| ----------- | -------- | ---------------------------------- | ----------------------------- |
+| `--mcp-url` | Yes      | —                                  | URL of the running MCP server |
+| `--query`   | No       | `"What is the capital of France?"` | Question to ask               |
+| `--model`   | No       | `claude-sonnet-4-20250514`         | Anthropic model to use        |
 
 
 ---
@@ -105,8 +107,8 @@ python searcher/mcp_server.py \
     --index-path indexes/bm25 \
     --port 8080 \
     --host 0.0.0.0 \
-    --public \
-    --transport streamable-http
+    --transport streamable-http \
+    --log-file searcher/logs/mcp_server_bm25.log
 ```
 
 > **Note:** `--host 0.0.0.0` is required to accept connections from Tailscale or other external networks. Without it, the server only listens on `127.0.0.1`.
@@ -115,12 +117,14 @@ python searcher/mcp_server.py \
 
 Pick the access method that fits your setup:
 
-| Method | URL |
-| --- | --- |
-| Local | `http://127.0.0.1:8080/mcp/` |
-| Tailscale (IP) | `http://<tailscale-ip>:8080/mcp/` |
-| Tailscale (hostname) | `http://<machine-name>.<tailnet>.ts.net:8080/mcp/` |
-| Public (ngrok) | printed by server on startup, e.g. `https://xxxx.ngrok-free.app/mcp` |
+
+| Method               | URL                                                                  |
+| -------------------- | -------------------------------------------------------------------- |
+| Local                | `http://127.0.0.1:8080/mcp/`                                         |
+| Tailscale (IP)       | `http://<tailscale-ip>:8080/mcp/`                                    |
+| Tailscale (hostname) | `http://<machine-name>.<tailnet>.ts.net:8080/mcp/`                   |
+| Public (ngrok)       | printed by server on startup, e.g. `https://xxxx.ngrok-free.app/mcp` |
+
 
 To find your Tailscale IP: `tailscale ip -4`
 
@@ -139,11 +143,11 @@ ANTHROPIC_API_KEY=<your_key> python tests/test_mcp_bm25.py \
 **Arguments:**
 
 
-| Argument    | Required | Default                    | Description                           |
-| ----------- | -------- | -------------------------- | ------------------------------------- |
-| `--mcp-url` | Yes      | —                          | URL of the running MCP server         |
-| `--model`   | No       | `claude-sonnet-4-20250514` | Anthropic model to use                |
-| `--budget`  | No       | `4096`                     | Thinking token budget                 |
+| Argument    | Required | Default                    | Description                   |
+| ----------- | -------- | -------------------------- | ----------------------------- |
+| `--mcp-url` | Yes      | —                          | URL of the running MCP server |
+| `--model`   | No       | `claude-sonnet-4-20250514` | Anthropic model to use        |
+| `--budget`  | No       | `4096`                     | Thinking token budget         |
 
 
 ---
@@ -170,8 +174,8 @@ python searcher/mcp_server.py \
     --index-path indexes/bm25 \
     --port 8080 \
     --host 0.0.0.0 \
-    --public \
-    --transport streamable-http
+    --transport streamable-http \
+    --log-file searcher/logs/mcp_server_bm25.log
 ```
 
 > **Note:** `--host 0.0.0.0` is required to accept connections from Tailscale or other external networks. Without it, the server only listens on `127.0.0.1`.
@@ -180,12 +184,14 @@ python searcher/mcp_server.py \
 
 Pick the access method that fits your setup:
 
-| Method | URL |
-| --- | --- |
-| Local | `http://127.0.0.1:8080/mcp/` |
-| Tailscale (IP) | `http://<tailscale-ip>:8080/mcp/` |
-| Tailscale (hostname) | `http://<machine-name>.<tailnet>.ts.net:8080/mcp/` |
-| Public (ngrok) | printed by server on startup, e.g. `https://xxxx.ngrok-free.app/mcp` |
+
+| Method               | URL                                                                  |
+| -------------------- | -------------------------------------------------------------------- |
+| Local                | `http://127.0.0.1:8080/mcp/`                                         |
+| Tailscale (IP)       | `http://<tailscale-ip>:8080/mcp/`                                    |
+| Tailscale (hostname) | `http://<machine-name>.<tailnet>.ts.net:8080/mcp/`                   |
+| Public (ngrok)       | printed by server on startup, e.g. `https://xxxx.ngrok-free.app/mcp` |
+
 
 To find your Tailscale IP: `tailscale ip -4`
 
@@ -201,11 +207,11 @@ ANTHROPIC_API_KEY=<your_key> python tests/test_mcp_langchain.py \
 **Arguments:**
 
 
-| Argument    | Required | Default                     | Description                           |
-| ----------- | -------- | --------------------------- | ------------------------------------- |
-| `--mcp-url` | Yes      | —                           | URL of the running MCP server         |
-| `--query`   | No       | `"What is BM25 retrieval?"` | Question to ask                       |
-| `--model`   | No       | `claude-sonnet-4-6`         | Anthropic model to use                |
+| Argument    | Required | Default                     | Description                   |
+| ----------- | -------- | --------------------------- | ----------------------------- |
+| `--mcp-url` | Yes      | —                           | URL of the running MCP server |
+| `--query`   | No       | `"What is BM25 retrieval?"` | Question to ask               |
+| `--model`   | No       | `claude-sonnet-4-6`         | Anthropic model to use        |
 
 
 ---
@@ -219,4 +225,8 @@ ANTHROPIC_API_KEY=<your_key> python tests/test_mcp_langchain.py \
   ```
 - Use `--host 0.0.0.0` when starting the server to allow connections from other machines (Tailscale, remote nodes). The default `127.0.0.1` only accepts local connections.
 - To access the server from another Tailscale node, use its Tailscale IP (`tailscale ip -4`) instead of `127.0.0.1`.
+- Use `--log-file <path>` to save server logs to a rotating file (10 MB max, 5 backups kept). Logs include timestamps, log level, and full tracebacks on errors. To disable file logging, pass `--log-file ""`. To inspect logs:
+  ```bash
+  tail -f searcher/logs/mcp_server_faiss.log
+  ```
 

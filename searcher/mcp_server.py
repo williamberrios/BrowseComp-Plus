@@ -1,5 +1,7 @@
+import logging
 import os
 import sys
+from logging.handlers import RotatingFileHandler
 
 from fastmcp import FastMCP
 from pyngrok import ngrok
@@ -21,86 +23,114 @@ load_dotenv(dotenv_path=script_env_path, override=False)
 import argparse
 
 
+def setup_logger(log_file: str | None) -> logging.Logger:
+    logger = logging.getLogger("mcp_server")
+    logger.setLevel(logging.DEBUG)
+    fmt = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+
+    # Always log to stdout
+    stream_handler = logging.StreamHandler(sys.stdout)
+    stream_handler.setFormatter(fmt)
+    logger.addHandler(stream_handler)
+
+    # Optionally log to a rotating file (10 MB max, keep last 5 files)
+    if log_file:
+        os.makedirs(os.path.dirname(os.path.abspath(log_file)), exist_ok=True)
+        file_handler = RotatingFileHandler(log_file, maxBytes=10 * 1024 * 1024, backupCount=5)
+        file_handler.setFormatter(fmt)
+        logger.addHandler(file_handler)
+        logger.info(f"Logging to file: {os.path.abspath(log_file)}")
+
+    return logger
+
+
 def main():
+    parser = argparse.ArgumentParser(description="MCP retrieval server")
+
+    parser.add_argument(
+        "--searcher-type",
+        choices=SearcherType.get_choices(),
+        required=True,
+        help=f"Type of searcher to use: {', '.join(SearcherType.get_choices())}",
+    )
+
+    # MCP server and high-level arguments
+    parser.add_argument(
+        "--snippet-max-tokens",
+        type=int,
+        default=512,
+        help="Number of tokens to include for each document snippet in search results using Qwen/Qwen3-0.6B tokenizer (default: 512). Set to -1 to disable.",
+    )
+    parser.add_argument(
+        "--k",
+        type=int,
+        default=5,
+        help="Fixed number of search results to return for all queries in this session (default: 5).",
+    )
+    parser.add_argument(
+        "--get-document",
+        action="store_true",
+        help="If set, register both the search tool and the get_document tool.",
+    )
+    parser.add_argument(
+        "--transport",
+        choices=["stdio", "streamable-http", "sse"],
+        default="sse",
+        help="Transport protocol to run the MCP server with. Use 'http' for streamable HTTP, 'sse' for Server-Sent Events (more reliable with OpenAI), or 'stdio' for standard input/output.",
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=8000,
+        help="Port to bind the HTTP server when --transport=http (default: 8000). Ignored for stdio.",
+    )
+    parser.add_argument(
+        "--host",
+        type=str,
+        default="127.0.0.1",
+        help="Host to bind the HTTP server (default: 127.0.0.1). Use 0.0.0.0 to accept connections from all interfaces.",
+    )
+    parser.add_argument(
+        "--public",
+        action="store_true",
+        help="If set with --transport=http, automatically create an ngrok tunnel and print the public MCP URL.",
+    )
+    parser.add_argument(
+        "--hf-token",
+        type=str,
+        help="Hugging Face token for accessing private datasets/models. If not provided, will use environment variables or CLI login.",
+    )
+    parser.add_argument(
+        "--hf-home",
+        type=str,
+        help="Hugging Face home directory for caching models and datasets. If not provided, will use environment variables or default.",
+    )
+    parser.add_argument(
+        "--log-file",
+        type=str,
+        default=os.path.join(current_dir, "logs", "mcp_server.log"),
+        help="Path to the log file (default: searcher/logs/mcp_server.log). Set to empty string to disable file logging.",
+    )
+
+    temp_args, _ = parser.parse_known_args()
+
+    searcher_class = SearcherType.get_searcher_class(temp_args.searcher_type)
+
+    searcher_class.parse_args(parser)
+
+    args = parser.parse_args()
+
+    log_file = args.log_file if args.log_file else None
+    logger = setup_logger(log_file)
+
     try:
-        parser = argparse.ArgumentParser(description="MCP retrieval server")
-
-        parser.add_argument(
-            "--searcher-type",
-            choices=SearcherType.get_choices(),
-            required=True,
-            help=f"Type of searcher to use: {', '.join(SearcherType.get_choices())}",
-        )
-
-        # MCP server and high-level arguments
-        parser.add_argument(
-            "--snippet-max-tokens",
-            type=int,
-            default=512,
-            help="Number of tokens to include for each document snippet in search results using Qwen/Qwen3-0.6B tokenizer (default: 512). Set to -1 to disable.",
-        )
-        parser.add_argument(
-            "--k",
-            type=int,
-            default=5,
-            help="Fixed number of search results to return for all queries in this session (default: 5).",
-        )
-        parser.add_argument(
-            "--get-document",
-            action="store_true",
-            help="If set, register both the search tool and the get_document tool.",
-        )
-        parser.add_argument(
-            "--transport",
-            choices=["stdio", "streamable-http", "sse"],
-            default="sse",
-            help="Transport protocol to run the MCP server with. Use 'http' for streamable HTTP, 'sse' for Server-Sent Events (more reliable with OpenAI), or 'stdio' for standard input/output.",
-        )
-        parser.add_argument(
-            "--port",
-            type=int,
-            default=8000,
-            help="Port to bind the HTTP server when --transport=http (default: 8000). Ignored for stdio.",
-        )
-        parser.add_argument(
-            "--host",
-            type=str,
-            default="127.0.0.1",
-            help="Host to bind the HTTP server (default: 127.0.0.1). Use 0.0.0.0 to accept connections from all interfaces.",
-        )
-        parser.add_argument(
-            "--public",
-            action="store_true",
-            help="If set with --transport=http, automatically create an ngrok tunnel and print the public MCP URL.",
-        )
-        parser.add_argument(
-            "--hf-token",
-            type=str,
-            help="Hugging Face token for accessing private datasets/models. If not provided, will use environment variables or CLI login.",
-        )
-        parser.add_argument(
-            "--hf-home",
-            type=str,
-            help="Hugging Face home directory for caching models and datasets. If not provided, will use environment variables or default.",
-        )
-
-        temp_args, _ = parser.parse_known_args()
-
-        searcher_class = SearcherType.get_searcher_class(temp_args.searcher_type)
-
-        searcher_class.parse_args(parser)
-
-        args = parser.parse_args()
-
         if args.hf_token:
-            print(
-                f"[DEBUG] Setting HF token from CLI argument: {args.hf_token[:10]}..."
-            )
+            logger.debug(f"Setting HF token from CLI argument: {args.hf_token[:10]}...")
             os.environ["HF_TOKEN"] = args.hf_token
             os.environ["HUGGINGFACE_HUB_TOKEN"] = args.hf_token
 
         if args.hf_home:
-            print(f"[DEBUG] Setting HF home from CLI argument: {args.hf_home}")
+            logger.debug(f"Setting HF home from CLI argument: {args.hf_home}")
             os.environ["HF_HOME"] = args.hf_home
 
         searcher = searcher_class(args)
@@ -122,10 +152,11 @@ def main():
             tools_registered.append("get_document")
         tools_str = ", ".join(tools_registered)
 
-        print(
-            f"MCP server started with {searcher.search_type} search (snippet_max_tokens={snippet_max_tokens}, k={k}) using transport {transport.upper()}"
+        logger.info(
+            f"MCP server started with {searcher.search_type} search "
+            f"(snippet_max_tokens={snippet_max_tokens}, k={k}) using transport {transport.upper()}"
         )
-        print(f"Registered tools: {tools_str}")
+        logger.info(f"Registered tools: {tools_str}")
 
         if public:
             try:
@@ -136,7 +167,7 @@ def main():
                 try:
                     tunnel = ngrok.connect(addr=port, bind_tls=True)
                     public_url = f"{tunnel.public_url}/mcp"
-                    print(
+                    logger.info(
                         "\n=============================================\n"
                         f"Public MCP endpoint available at: {public_url}\n"
                         "Use this URL in the MCP clients via --mcp-url\n"
@@ -144,22 +175,26 @@ def main():
                     )
                 except PyngrokNgrokError as e:
                     first_line = str(e).split("\n")[0]
-                    print(
-                        f"[Warning] Failed to start ngrok tunnel: {first_line}\n"
-                        f"Continuing with local server on http://localhost:{port}",
+                    logger.warning(
+                        f"Failed to start ngrok tunnel: {first_line}\n"
+                        f"Continuing with local server on http://localhost:{port}"
                     )
             except ImportError:
-                print(
-                    "[Warning] pyngrok not installed; continuing without public tunnel."
-                )
+                logger.warning("pyngrok not installed; continuing without public tunnel.")
 
         if transport == "stdio":
             mcp.run(transport="stdio")
         else:
-            mcp.run(transport=transport, path="/mcp", host=host, port=port)
+            mcp.run(
+                transport=transport,
+                path="/mcp",
+                host=host,
+                port=port,
+                uvicorn_config={"timeout_keep_alive": 600},  # keep idle connections alive 10 min
+            )
 
     except Exception as e:
-        print("Error", e)
+        logger.exception(f"Fatal error: {e}")
         raise
 
 
